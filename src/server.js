@@ -9,22 +9,24 @@ const app = express();
 
 // Serve static files from public directory
 app.use(express.static('public'));
+app.use(express.static('views'));
 
-// Serve the main page
+// Update port for deployment
+const PORT = process.env.PORT || 3000;
+
+// Routes
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/index.html'));
 });
 
-// Add this route for the video page
 app.get('/video', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/video.html'));
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
-
 app.get('/chatbot', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/chatbot.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
