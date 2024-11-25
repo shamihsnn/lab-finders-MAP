@@ -285,7 +285,9 @@ let state = {
     currentFilters: {
         service: '',
         timing: '',
-        distance: 5
+        distance: 5,
+        rating:''
+        
     }
 };
 
@@ -336,22 +338,102 @@ function initializeLabMarkers() {
     });
 }
 
+// Modify the createLabPopupContent function
 function createLabPopupContent(lab) {
+    const avgRating = getAverageRating(lab.name);
+    const reviews = getLabReviews(lab.name);
+    
     return `
         <div class="popup-content">
             <h3 class="text-lg font-bold mb-2">${lab.name}</h3>
+            <div class="rating-container">
+                <div class="stars">
+                    ${createStarRating(avgRating)}
+                </div>
+                <p>Average Rating: ${avgRating.toFixed(1)} (${ratingsDB.ratings[lab.name]?.length || 0} ratings)</p>
+                
+                <div class="review-form">
+                    <select class="rating-input">
+                        <option value="">Select Rating</option>
+                        ${[1,2,3,4,5].map(n => `<option value="${n}">${n} Stars</option>`).join('')}
+                    </select>
+                    <textarea class="review-input" placeholder="Write your review (optional)"></textarea>
+                    <button onclick="submitReview('${lab.name}')" class="review-submit">Submit Review</button>
+                </div>
+                
+                <div class="reviews-list">
+                    ${reviews.map(review => `
+                        <div class="review-item">
+                            <div class="stars">${createStarRating(review.rating)}</div>
+                            <p>${review.review}</p>
+                            <small>${new Date(review.date).toLocaleDateString()}</small>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
             <p class="mb-1"><strong>Address:</strong> ${lab.address}</p>
             <p class="mb-1"><strong>Contact:</strong> ${lab.contact}</p>
             <p class="mb-1"><strong>Timings:</strong> ${lab.timings}</p>
             <p class="mb-1"><strong>Services:</strong> ${lab.services.join(', ')}</p>
             <p class="mb-2"><strong>Info:</strong> ${lab.info}</p>
+            
             <button onclick="getDirections(${lab.lat}, ${lab.lng})" 
-                class="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors">
+               style="background-color: #007BFF; color: #fff; padding: 10px; border: none; border-radius: 4px; cursor: pointer;">
                 Get Directions
             </button>
         </div>
     `;
 }
+function createStarRating(rating) {
+    return '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
+}
+
+function submitReview(labName) {
+    const ratingSelect = document.querySelector('.rating-input');
+    const reviewText = document.querySelector('.review-input');
+    
+    if (!ratingSelect.value) {
+        alert('Please select a rating');
+        return;
+    }
+    
+    addRating(labName, parseInt(ratingSelect.value), reviewText.value);
+    
+    // Find the marker for this lab
+    const marker = state.markers.find(m => m.lab.name === labName);
+    if (marker) {
+        // Update popup content
+        marker.marker.getPopup().setContent(createLabPopupContent(marker.lab));
+        // Reset form
+        ratingSelect.value = '';
+        reviewText.value = '';
+    }
+}
+
+
+// Add rating filter to your existing filter system
+function addRatingFilter() {
+    const filterContainer = document.querySelector('.lab-finder-filters');
+    if (!filterContainer) return;
+    
+    const ratingFilter = document.createElement('select');
+    ratingFilter.className = 'rating-filter';
+    ratingFilter.innerHTML = `
+        <option value="">All Ratings</option>
+        <option value="4">4+ Stars</option>
+        <option value="3">3+ Stars</option>
+        <option value="2">2+ Stars</option>
+    `;
+    
+    filterContainer.appendChild(ratingFilter);
+    
+    ratingFilter.addEventListener('change', () => {
+        state.currentFilters.rating = ratingFilter.value;
+        updateFilteredLabs();
+    });
+}
+
 
 // Search Functionality
 async function searchLabs() {
@@ -406,7 +488,6 @@ function updateMapForSearch(location, searchInput) {
     state.map.setView([lat, lon], 15);
 }
 
-// Lab Finder UI
 function createLabFinderUI() {
     const container = document.createElement('div');
     container.className = 'lab-finder-overlay';
@@ -424,6 +505,14 @@ function createLabFinderUI() {
                     ${getUniqueServices().map(service => 
                         `<option value="${service}">${service}</option>`
                     ).join('')}
+                </select>
+                <select id="rating-filter" class="filter-select">
+                    <option value="">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Star</option>
                 </select>
                 <select id="timing-filter" class="filter-select">
                     <option value="">All Timings</option>
@@ -494,18 +583,97 @@ function filterLabs(userLocation) {
             lab.lng
         );
         
+        const labRating = getAverageRating(lab.name);
+        const meetsRatingCriteria = !state.currentFilters.rating || 
+            labRating >= parseFloat(state.currentFilters.rating);
+        
         return (
             (!state.currentFilters.service || lab.services.includes(state.currentFilters.service)) &&
             (!state.currentFilters.timing || matchesTiming(lab.timings, state.currentFilters.timing)) &&
-            (distance <= parseFloat(state.currentFilters.distance))
+            (distance <= parseFloat(state.currentFilters.distance)) &&
+            meetsRatingCriteria
         );
     }).map(lab => ({
         ...lab,
-        distance: getDistance(userLocation.lat, userLocation.lng, lab.lat, lab.lng)
+        distance: getDistance(userLocation.lat, userLocation.lng, lab.lat, lab.lng),
+        rating: getAverageRating(lab.name)
+    })).sort((a, b) => a.distance - b.distance);
+}
+// Add this to your existing filter options in createLabFinderUI function
+function createLabFinderUI() {
+    const container = document.createElement('div');
+    container.className = 'lab-finder-overlay';
+    container.innerHTML = `
+        <div class="lab-finder-container">
+            <div class="lab-finder-header">
+                <h2>Find Nearby Labs</h2>
+                <button id="close-lab-finder" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="lab-finder-filters">
+                <select id="service-filter" class="filter-select">
+                    <option value="">All Services</option>
+                    ${getUniqueServices().map(service => 
+                        `<option value="${service}">${service}</option>`
+                    ).join('')}
+                </select>
+                <select id="rating-filter" class="filter-select">
+                    <option value="">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Star</option>
+                </select>
+                <select id="timing-filter" class="filter-select">
+                    <option value="">All Timings</option>
+                    <option value="24/7">24/7</option>
+                    <option value="day">Day Time Only</option>
+                </select>
+                <div class="range-filter">
+                    <label>Max Distance (km):</label>
+                    <input type="range" id="distance-filter" min="1" max="20" value="5">
+                    <span id="distance-value">5 km</span>
+                </div>
+            </div>
+            <div id="filtered-lab-list" class="lab-list"></div>
+        </div>
+    `;
+    return container;
+}
+
+// Update your state to include rating filter
+state.currentFilters.rating = '';
+
+// Modify your filterLabs function to include rating filtering
+function filterLabs(userLocation) {
+    return labs.filter(lab => {
+        const distance = getDistance(
+            userLocation.lat, 
+            userLocation.lng, 
+            lab.lat, 
+            lab.lng
+        );
+        
+        const labRating = getAverageRating(lab.name);
+        const meetsRatingCriteria = !state.currentFilters.rating || 
+            labRating >= parseFloat(state.currentFilters.rating);
+        
+        return (
+            (!state.currentFilters.service || lab.services.includes(state.currentFilters.service)) &&
+            (!state.currentFilters.timing || matchesTiming(lab.timings, state.currentFilters.timing)) &&
+            (distance <= parseFloat(state.currentFilters.distance)) &&
+            meetsRatingCriteria
+        );
+    }).map(lab => ({
+        ...lab,
+        distance: getDistance(userLocation.lat, userLocation.lng, lab.lat, lab.lng),
+        rating: getAverageRating(lab.name)
     })).sort((a, b) => a.distance - b.distance);
 }
 
-
+// Update the display of filtered labs to show ratings
 function displayFilteredLabs(filteredLabs) {
     const labListElement = document.getElementById('filtered-lab-list');
     if (!labListElement) return;
@@ -514,23 +682,23 @@ function displayFilteredLabs(filteredLabs) {
         filteredLabs.map(lab => `
             <div class="lab-item">
                 <h3>${lab.name}</h3>
+                <div class="stars">${createStarRating(lab.rating)}</div>
+                <p>Rating: ${lab.rating.toFixed(1)} stars</p>
                 <p>Distance: ${lab.distance.toFixed(1)} km</p>
                 <p>Timings: ${lab.timings}</p>
                 <p>Services: ${lab.services.join(', ')}</p>
-                <div class="lab-actions" style="margin-top: 10px;">
+                <div class="lab-actions">
                     <button onclick="showOnMap(${lab.lat}, ${lab.lng})" 
-                        style="background-color: #4CAF50; color: white; padding: 5px 10px; margin-right: 10px; border: none; border-radius: 4px; cursor: pointer;">
-                        <i class="fas fa-map-marker-alt"></i> Show on Map
-                    </button>
-                    <button onclick="getDirections(${lab.lat}, ${lab.lng})"
-                        style="background-color: #2196F3; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">
-                        <i class="fas fa-directions"></i> Get Directions
-                    </button>
+                        class="btn-primary">See on Map</button>
+                    <button onclick="getDirections(${lab.lat}, ${lab.lng})" 
+                        class="btn-secondary">Get Directions</button>
                 </div>
             </div>
         `).join('') :
         '<div class="no-results">No labs found matching your criteria</div>';
 }
+
+
 
 
 
@@ -763,6 +931,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state.recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
 
     // Initialize features
+    initializeRatings();
+    addRatingFilter();
     initializeMap();
     getUserLocation()
     .then(userLocation => {
@@ -772,7 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add user marker when he searches kuch then
         L.marker([userLocation.lat, userLocation.lng], {
-            icon: IconFactory.createIcon('blue')
+            icon: IconFactory.createIcon('green')
         })
         .addTo(state.map)
         .bindPopup('Your Location');
