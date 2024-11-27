@@ -291,12 +291,11 @@ let state = {
     }
 };
 
-// Icon Factory
 const IconFactory = {
     createIcon(color) {
         return L.icon({
-            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconUrl: `https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-2x-${color}.png`,
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
@@ -308,8 +307,14 @@ const IconFactory = {
     },
     get searchIcon() {
         return this.createIcon('blue');
+    },
+    get userIcon() {
+        return this.createIcon('green');
     }
 };
+
+
+
 
 // Map Initialization
 function initializeMap() {
@@ -331,12 +336,26 @@ function initializeMap() {
 // Lab Markers
 function initializeLabMarkers() {
     state.markers = labs.map(lab => {
-        const marker = L.marker([lab.lat, lab.lng], { icon: IconFactory.labIcon })
-            .addTo(state.map)
-            .bindPopup(createLabPopupContent(lab));
+        const marker = L.marker([lab.lat, lab.lng], { 
+            icon: IconFactory.labIcon
+        })
+        .addTo(state.map)
+        .bindPopup(createLabPopupContent(lab));
         return { lab, marker };
     });
 }
+
+function addUserMarker(userLocation) {
+    const userMarker = L.marker([userLocation.lat, userLocation.lng], {
+        icon: IconFactory.userIcon,
+        zIndexOffset: 1000
+    })
+    .addTo(state.map)
+    .bindPopup('Your Location');
+    
+    return userMarker;
+}
+
 
 // Modify the createLabPopupContent function
 function createLabPopupContent(lab) {
@@ -480,13 +499,19 @@ function updateMapForSearch(location, searchInput) {
         state.map.removeLayer(state.searchMarker);
     }
 
-    state.searchMarker = L.marker([lat, lon], { icon: IconFactory.searchIcon })
-        .addTo(state.map)
-        .bindPopup(createSearchPopupContent(searchInput, display_name))
-        .openPopup();
+    const searchIcon = IconFactory.searchIcon || L.Marker.prototype.options.icon;
+    
+    state.searchMarker = L.marker([lat, lon], { 
+        icon: searchIcon,
+        zIndexOffset: 500 
+    })
+    .addTo(state.map)
+    .bindPopup(createSearchPopupContent(searchInput, display_name))
+    .openPopup();
 
     state.map.setView([lat, lon], 15);
 }
+
 
 function createLabFinderUI() {
     const container = document.createElement('div');

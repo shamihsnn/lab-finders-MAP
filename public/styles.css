@@ -575,3 +575,10 @@ footer {
     }
 }
 
+.leaflet-marker-icon {
+    background: none !important;
+}
+
+.leaflet-marker-shadow {
+    background: none !important;
+}
