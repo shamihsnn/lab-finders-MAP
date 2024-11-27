@@ -55,58 +55,29 @@ function getLabReviews(labName) {
 
 
 function submitReview(labName) {
-    const ratingSelect = document.querySelector('.rating-input');
-    const reviewText = document.querySelector('.review-input');
-    const submitButton = document.querySelector('.review-submit');
+    const ratingSelect = document.getElementById(`rating-${labName}`);
+    const reviewText = document.getElementById(`review-${labName}`);
     
-    if (!ratingSelect.value) {
+    if (!ratingSelect || !ratingSelect.value) {
         alert('Please select a rating');
         return;
     }
     
-    // Disable submit button to prevent multiple submissions
-    submitButton.disabled = true;
+    const rating = parseInt(ratingSelect.value);
+    const review = reviewText ? reviewText.value : '';
     
-    // Add the rating
-    addRating(labName, parseInt(ratingSelect.value), reviewText.value);
+    addRating(labName, rating, review);
     
-    // Update the UI immediately
-    const rating = getAverageRating(labName);
-    const reviews = getLabReviews(labName);
-    
-    // Update the rating display in the popup
-    const ratingContainer = document.querySelector('.rating-container');
-    if (ratingContainer) {
-        const starsElement = ratingContainer.querySelector('.stars');
-        const ratingText = ratingContainer.querySelector('p');
-        if (starsElement) starsElement.innerHTML = createStarRating(rating);
-        if (ratingText) ratingText.textContent = `Average Rating: ${rating.toFixed(1)} (${ratingsDB.ratings[labName]?.length || 0} ratings)`;
-        
-        // Update reviews list
-        const reviewsList = ratingContainer.querySelector('.reviews-list');
-        if (reviewsList) {
-            reviewsList.innerHTML = reviews.map(review => `
-                <div class="review-item">
-                    <div class="stars">${createStarRating(review.rating)}</div>
-                    <p>${review.review}</p>
-                    <small>${new Date(review.date).toLocaleDateString()}</small>
-                </div>
-            `).join('');
-        }
+    // Find and update the marker popup
+    const marker = state.markers.find(m => m.lab.name === labName);
+    if (marker) {
+        marker.marker.getPopup().setContent(createLabPopupContent(marker.lab));
     }
     
-    // Reset form
-    ratingSelect.value = '';
-    reviewText.value = '';
-    
-    // Re-enable submit button after a short delay
-    setTimeout(() => {
-        submitButton.disabled = false;
-    }, 1000);
-    
-    // Update lab finder list if open
-    updateLabFinderList(labName, rating);
+    // Show success message
+    alert('Thank you for your review!');
 }
+
 
 function updateLabFinderList(labName, rating) {
     const labListElement = document.getElementById('filtered-lab-list');

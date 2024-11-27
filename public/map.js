@@ -364,46 +364,61 @@ function createLabPopupContent(lab) {
     
     return `
         <div class="popup-content">
-            <h3 class="text-lg font-bold mb-2">${lab.name}</h3>
-            <div class="rating-container">
-                <div class="stars">
-                    ${createStarRating(avgRating)}
+            <div class="lab-header">
+                <h3 class="lab-name">${lab.name}</h3>
+                <div class="rating-row">
+                    <div class="stars">${createStarRating(avgRating)}</div>
+                    <span class="rating-text">${avgRating.toFixed(1)} (${ratingsDB.ratings[lab.name]?.length || 0})</span>
                 </div>
-                <p>Average Rating: ${avgRating.toFixed(1)} (${ratingsDB.ratings[lab.name]?.length || 0} ratings)</p>
-                
-                <div class="review-form">
-                    <select class="rating-input">
-                        <option value="">Select Rating</option>
+            </div>
+
+            <div class="lab-info">
+                <div class="info-row">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${lab.address}</span>
+                </div>
+                <div class="info-row">
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:${lab.contact}" class="contact-link">${lab.contact}</a>
+                </div>
+                <div class="info-row">
+                    <i class="fas fa-clock"></i>
+                    <span>${lab.timings}</span>
+                </div>
+            </div>
+
+            <div class="rating-section">
+                <div class="rating-form">
+                    <select class="rating-input" id="rating-${lab.name}">
+                        <option value="">Rate this lab</option>
                         ${[1,2,3,4,5].map(n => `<option value="${n}">${n} Stars</option>`).join('')}
                     </select>
-                    <textarea class="review-input" placeholder="Write your review (optional)"></textarea>
-                    <button onclick="submitReview('${lab.name}')" class="review-submit">Submit Review</button>
+                    <textarea class="review-input" id="review-${lab.name}" 
+                        placeholder="Write your review (optional)"></textarea>
+                    <button onclick="submitReview('${lab.name}')" class="submit-rating-btn">
+                        Submit Rating
+                    </button>
                 </div>
-                
+            </div>
+
+            <div class="reviews-container">
+                <h4 class="reviews-header">Recent Reviews</h4>
                 <div class="reviews-list">
                     ${reviews.map(review => `
                         <div class="review-item">
-                            <div class="stars">${createStarRating(review.rating)}</div>
-                            <p>${review.review}</p>
-                            <small>${new Date(review.date).toLocaleDateString()}</small>
+                            <div class="review-stars">${createStarRating(review.rating)}</div>
+                            <p class="review-text">${review.review}</p>
+                            <span class="review-date">${new Date(review.date).toLocaleDateString()}</span>
                         </div>
                     `).join('')}
                 </div>
             </div>
-            
-            <p class="mb-1"><strong>Address:</strong> ${lab.address}</p>
-            <p class="mb-1"><strong>Contact:</strong> ${lab.contact}</p>
-            <p class="mb-1"><strong>Timings:</strong> ${lab.timings}</p>
-            <p class="mb-1"><strong>Services:</strong> ${lab.services.join(', ')}</p>
-            <p class="mb-2"><strong>Info:</strong> ${lab.info}</p>
-            
-            <button onclick="getDirections(${lab.lat}, ${lab.lng})" 
-               style="background-color: #007BFF; color: #fff; padding: 10px; border: none; border-radius: 4px; cursor: pointer;">
-                Get Directions
-            </button>
         </div>
     `;
 }
+
+
+
 function createStarRating(rating) {
     return '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
 }

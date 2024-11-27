@@ -582,3 +582,246 @@ footer {
 .leaflet-marker-shadow {
     background: none !important;
 }
+
+
+
+/* Rating and Review System */
+/* Popup Base Styles */
+.popup-content {
+    width: 240px;
+    max-height: 50vh;
+    padding: 12px;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+.popup-content::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Compact Header */
+.lab-header {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.lab-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+/* Info Section */
+.lab-info {
+    padding: 8px 0;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.info-row i {
+    font-size: 12px;
+    color: #f10d0d;
+    width: 15px;
+}
+
+/* Rating Section */
+.rating-section {
+    padding: 8px 0;
+}
+
+.rating-form {
+    gap: 8px;
+}
+
+.rating-input {
+    padding: 6px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.review-input {
+    height: 50px;
+    padding: 6px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* Reviews List */
+.reviews-container {
+    margin-top: 8px;
+}
+
+.reviews-header {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.reviews-list {
+    gap: 6px;
+}
+
+.review-item {
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.review-stars {
+    font-size: 11px;
+    color: #ffd700;
+}
+
+.review-text {
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 4px 0;
+    color: #444;
+}
+
+.review-date {
+    font-size: 10px;
+    color: #888;
+}
+
+/* Submit Button */
+.submit-rating-btn {
+    background: #f10d0d;
+    color: white;
+    padding: 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.submit-rating-btn:active {
+    transform: scale(0.98);
+}
+
+/* Mobile Optimization */
+/* Large Desktop Screens */
+@media (min-width: 1200px) {
+    .popup-content {
+        width: 320px;
+        padding: 18px;
+    }
+    
+    .lab-name {
+        font-size: 18px;
+    }
+    
+    .info-row {
+        font-size: 14px;
+    }
+}
+
+/* Standard Desktop */
+@media (max-width: 1199px) {
+    .popup-content {
+        width: 300px;
+        padding: 16px;
+    }
+    
+    .lab-name {
+        font-size: 16px;
+    }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 280px;
+        padding: 14px;
+    }
+    
+    .lab-name {
+        font-size: 15px;
+    }
+    
+    .info-row {
+        font-size: 13px;
+    }
+}
+
+/* Large Phones */
+@media (max-width: 480px) {
+    .popup-content {
+        width: 260px;
+        padding: 12px;
+    }
+    
+    .lab-name {
+        font-size: 14px;
+    }
+    
+    .info-row {
+        font-size: 12px;
+    }
+}
+
+/* Small Phones */
+@media (max-width: 360px) {
+    .popup-content {
+        width: 240px;
+        padding: 10px;
+    }
+    
+    .lab-name {
+        font-size: 13px;
+    }
+    
+    .info-row {
+        font-size: 11px;
+    }
+}
+
+/* Extra Small Phones */
+@media (max-width: 320px) {
+    .popup-content {
+        width: 220px;
+        padding: 8px;
+    }
+    
+    .lab-name {
+        font-size: 12px;
+    }
+    
+    .info-row {
+        font-size: 10px;
+    }
+}
+
+/* Landscape Mode */
+@media (max-height: 500px) and (orientation: landscape) {
+    .popup-content {
+        max-height: 80vh;
+        width: 300px;
+    }
+    
+    .reviews-list {
+        max-height: 150px;
+    }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .popup-content {
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+}
+
