@@ -22,6 +22,16 @@ const labs = [
         address: "gudwal morr, Wah Cantt"
     },
     {
+        name: "university of haripur",
+        lat: 33.978206220450126, 
+        lng: 72.91292367017417,
+        contact: "051-123-4567",
+        info: "university ",
+        services: ["education,MLT"],
+        timings: "24/7",
+        address: "haripur"
+    },
+    {
         name: "POF Hospital Labs",
         lat: 33.75014826546548,
         lng: 72.78497798750843,
@@ -351,7 +361,7 @@ function addUserMarker(userLocation) {
         zIndexOffset: 1000
     })
     .addTo(state.map)
-    .bindPopup('Your Location');
+    .bindPopup('Your Location 📍 from nearby lab');
     
     return userMarker;
 }
@@ -486,12 +496,12 @@ async function searchLabs() {
         }
 
         updateMapForSearch(location, searchInput);
-        const nearbyLabs = findNearbyLabs(location.lat, location.lon);
+        const nearbyLabs = nearbyLabs(location.lat, location.lon);
         updateLabList(nearbyLabs);
         addToRecentSearches(searchInput);
     } catch (error) {
         console.error('Search error:', error);
-        showAlert('Search failed. Please try again.');
+        showAlert('press OK ad we"ll take you there');
     }
 }
 
@@ -521,7 +531,7 @@ function updateMapForSearch(location, searchInput) {
         zIndexOffset: 500 
     })
     .addTo(state.map)
-    .bindPopup(createSearchPopupContent(searchInput, display_name))
+    .bindPopup(createLabPopupContent(searchInput, display_name))
     .openPopup();
 
     state.map.setView([lat, lon], 15);
@@ -961,92 +971,126 @@ function showOnMap(lat, lng) {
 
 // Event Listeners and Initialization
 document.addEventListener('DOMContentLoaded', () => {
-    // Cache DOM elements
-    DOM.map = document.getElementById('map');
-    DOM.searchInput = document.getElementById('search');
-    DOM.labList = document.getElementById('labList');
-    DOM.recentSearches = document.getElementById('recentSearches');
-
-    // Load saved data
-    state.recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-
-    // Initialize features
-    initializeRatings();
-    addRatingFilter();
-    initializeMap();
-    getUserLocation()
-    .then(userLocation => {
-        const nearbyLabs = filterLabsByDistance(userLocation);
-        updateLabList(nearbyLabs);
-        
-        
-        // Add user marker when he searches kuch then
-        L.marker([userLocation.lat, userLocation.lng], {
-            icon: IconFactory.createIcon('green')
-        })
-        .addTo(state.map)
-        .bindPopup('Your Location');
-        
-        // Center map on user uski location ki bsis par
-        state.map.setView([userLocation.lat, userLocation.lng], 13);
-    })
-    .catch(error => {
-        console.error('Location error:', error);
-        state.map.setView(CONFIG.DEFAULT_CENTER, CONFIG.DEFAULT_ZOOM);
-        const nearbyLabs = filterLabsByDistance(CONFIG.DEFAULT_CENTER);
-        updateLabList(nearbyLabs);
-        showAlert('Unable to get your location. Please enable location services.');
-    });
-    //yeh  Set up katta hai search functionality
-    if (DOM.searchInput) {
-        DOM.searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchLabs();
-        });
-    }
-
-// matctiming wala fuction hai yeh
-
-function matchesTiming(labTiming, filterTiming) {
-    if (!filterTiming) return true;
-    if (filterTiming === '24/7') return labTiming === '24/7';
-    if (filterTiming === 'day') {
-        return labTiming !== '24/7' && labTiming.includes('AM');
-    }
-    return true;
-}
-
-
-    // Initialize screenshot button wala function hai yeh
-    const screenshotButton = document.querySelector('.action-button:has(i.fa-camera)');
-    if (screenshotButton) {
-        screenshotButton.addEventListener('click', takeScreenshot);
-    }
-
-    // Initialize lab finder
-    const labFinderButton = document.querySelector('[data-action="lab-finder"]');
-
-    if (labFinderButton) {
-        labFinderButton.addEventListener('click', () => {
-            const labFinderUI = createLabFinderUI();
-            document.body.appendChild(labFinderUI);
-            
-            setTimeout(() => {
-                labFinderUI.classList.add('active');
-            }, 10);
-            
-            initializeFilters();
-            updateFilteredLabs(); // This line is new and important
-            
-            document.getElementById('close-lab-finder').addEventListener('click', () => {
-                labFinderUI.classList.remove('active');
-                setTimeout(() => {
-                    document.body.removeChild(labFinderUI);
-                }, 300);
-            });
-        });
-    }
+    // Add loader first
+    const loaderHTML = `
+    <div class="map-loader">
+        <div class="robot-text" id="robotText"></div>
+        <div class="ambulance-loader">
+            <object type="image/svg+xml" data="/ambulance-loader.svg" class="ambulance-svg"></object>
+        </div>
+    </div>
+    `;
+    
     
 
-    // Update UI
-    updateRecentSearchesUI();
+    
+    document.body.insertAdjacentHTML('beforeend', loaderHTML);
+    
+    const loader = document.querySelector('.map-loader');
+    const robotText = document.getElementById('robotText');
+
+    const funnyMessages = [
+        "INITIALIZING LAB FINDER 🔬...",
+        "SCANNING NEARBY LABORATORIES 🧪...", 
+        "WAKING UP SLEEPY DOCTORS 👨‍⚕️...",
+        "LOADING MEDICAL DATABASE 💊...",
+        "ALMOST READY TO HELP YOU 🚑..."
+    ];
+
+    let messageIndex = 0;
+
+    // Show messages sequentially
+    function showMessages() {
+        if (messageIndex < funnyMessages.length) {
+            robotText.textContent = funnyMessages[messageIndex];
+            messageIndex++;
+            setTimeout(showMessages, 2000);
+        } else {
+            // Only start fade out after all messages are shown
+            loader.style.transition = 'opacity 0.8s';
+            loader.style.opacity = '0';
+            
+            setTimeout(() => {
+                loader.remove();
+                
+                // Cache DOM elements
+                DOM.map = document.getElementById('map');
+                DOM.searchInput = document.getElementById('search');
+                DOM.labList = document.getElementById('labList');
+                DOM.recentSearches = document.getElementById('recentSearches');
+
+                // Load saved data
+                state.recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+
+                // Initialize features
+                initializeRatings();
+                addRatingFilter();
+                initializeMap();
+                
+                getUserLocation()
+                    .then(userLocation => {
+                        const nearbyLabs = filterLabsByDistance(userLocation);
+                        updateLabList(nearbyLabs);
+                        
+                        L.marker([userLocation.lat, userLocation.lng], {
+                            icon: IconFactory.createIcon('green')
+                        })
+                        .addTo(state.map)
+                        .bindPopup('Your Location 📍 from nearby lab');
+                        
+                        state.map.setView([userLocation.lat, userLocation.lng], 13);
+                    })
+                    .catch(error => {
+                        console.error('Location error:', error);
+                        state.map.setView(CONFIG.DEFAULT_CENTER, CONFIG.DEFAULT_ZOOM);
+                        const nearbyLabs = filterLabsByDistance(CONFIG.DEFAULT_CENTER);
+                        updateLabList(nearbyLabs);
+                        showAlert('Unable to get your location. Please enable location services.');
+                    });
+
+                if (DOM.searchInput) {
+                    DOM.searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') searchLabs();
+                    });
+                }
+
+                // Screenshot functionality
+                const screenshotButton = document.querySelector('.action-button:has(i.fa-camera)');
+                if (screenshotButton) {
+                    screenshotButton.addEventListener('click', takeScreenshot);
+                }
+
+                // Lab finder initialization
+                const labFinderButton = document.querySelector('[data-action="lab-finder"]');
+                if (labFinderButton) {
+                    labFinderButton.addEventListener('click', () => {
+                        const labFinderUI = createLabFinderUI();
+                        document.body.appendChild(labFinderUI);
+                        
+                        setTimeout(() => {
+                            labFinderUI.classList.add('active');
+                        }, 10);
+                        
+                        initializeFilters();
+                        updateFilteredLabs();
+                        
+                        document.getElementById('close-lab-finder').addEventListener('click', () => {
+                            labFinderUI.classList.remove('active');
+                            setTimeout(() => {
+                                document.body.removeChild(labFinderUI);
+                            }, 300);
+                        });
+                    });
+                }
+
+                // Update UI
+                updateRecentSearchesUI();
+            }, 800);
+        }
+    }
+
+    // Start showing messages
+    showMessages();
 });
+
+
