@@ -17,20 +17,17 @@
       animation: blink 0.5s ease-in-out infinite alternate;
     }
     
-    
-    
     .wheel {
       animation: bounce 0.5s ease-in-out infinite alternate;
     }
-    
 @keyframes drive {
     0% { 
-        transform: translateX(-120%) scale(2.7) translateY(50px);
-        opacity: 0;
+        transform: translateX(-5%) scale(2.7) translateY(20px);
+        opacity: 1;
         filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.2));
     }
     20% {
-        transform: translateX(-80%) scale(2.7) translateY(0);
+        transform: translateX(-10%) scale(2.7) translateY(0);
         opacity: 1;
         filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.3));
     }
@@ -46,9 +43,7 @@
     }
 }
 
-
-
-    
+  
     @keyframes blink {
       0% { fill: #ff0000; }
       100% { fill: #ff6666; }
@@ -79,9 +74,6 @@
       100% { transform: translateY(2px); }
     }
   </style>
-
-
-
 
   <g id="ambulance-group">
     <!-- Main body -->

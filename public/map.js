@@ -396,6 +396,25 @@ function createLabPopupContent(lab) {
                     <span>${lab.timings}</span>
                 </div>
             </div>
+            
+            <div style="padding: 8px 0;">
+                <button onclick="getDirections(${lab.lat}, ${lab.lng})" 
+                    style="width: 100%; 
+                           background: #f10d0d; 
+                           color: white; 
+                           padding: 8px; 
+                           font-size: 12px; 
+                           border-radius: 6px; 
+                           border: none; 
+                           cursor: pointer; 
+                           display: flex; 
+                           align-items: center; 
+                           justify-content: center; 
+                           gap: 6px;">
+                    <i class="fas fa-directions"></i>
+                    Get Directions
+                </button>
+            </div>
 
             <div class="rating-section">
                 <div class="rating-form">
@@ -410,6 +429,9 @@ function createLabPopupContent(lab) {
                     </button>
                 </div>
             </div>
+
+
+         
 
             <div class="reviews-container">
                 <h4 class="reviews-header">Recent Reviews</h4>
@@ -990,11 +1012,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const robotText = document.getElementById('robotText');
 
     const funnyMessages = [
-        "INITIALIZING LAB FINDER 🔬...",
-        "SCANNING NEARBY LABORATORIES 🧪...", 
-        "WAKING UP SLEEPY DOCTORS 👨‍⚕️...",
-        "LOADING MEDICAL DATABASE 💊...",
-        "ALMOST READY TO HELP YOU 🚑..."
+        "INITIALIZING LAB FINDER ...",
+        "SCANNING NEARBY LABORATORIES ...", 
+        "WAKING UP SLEEPY DOCTORS ...",
+        "LOADING MEDICAL DATABASE ...",
+        "ALMOST READY TO HELP YOU ..."
     ];
 
     let messageIndex = 0;
