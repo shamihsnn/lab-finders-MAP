@@ -995,11 +995,15 @@ function showOnMap(lat, lng) {
 document.addEventListener('DOMContentLoaded', () => {
     // Add loader first
     const loaderHTML = `
-    <div class="map-loader">
-        <div class="robot-text" id="robotText"></div>
-        <div class="ambulance-loader">
-            <object type="image/svg+xml" data="/ambulance-loader.svg" class="ambulance-svg"></object>
+    <div class="app-loader">
+        <div class="logo-container">
+            <h1 class="app-logo">MediMap</h1>
+            <i class="fas fa-mobile-alt mobile-icon"></i>
         </div>
+        <div class="ambulance-container">
+            <img src="/ambulance-loader.svg" alt="Loading..." class="ambulance-loader">
+        </div>
+        <p id="robotText" class="loading-text"></p>
     </div>
     `;
     
@@ -1008,26 +1012,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.body.insertAdjacentHTML('beforeend', loaderHTML);
     
-    const loader = document.querySelector('.map-loader');
+    const loader = document.querySelector('.app-loader');
     const robotText = document.getElementById('robotText');
-
-    const funnyMessages = [
-        "INITIALIZING LAB FINDER ...",
-        "SCANNING NEARBY LABORATORIES ...", 
-        "LOADING MEDICAL DATABASE ...",
-        "ALMOST READY TO HELP YOU ..."
-        
+    const loadingMessages = [
+        "Initializing MediMap...",
+        "Preparing Your Experience...",
+        "Almost Ready..."
     ];
+    
 
     let messageIndex = 0;
 
     // Show messages sequentially
     function showMessages() {
-        if (messageIndex < funnyMessages.length) {
-            robotText.textContent = funnyMessages[messageIndex];
+        if (messageIndex < loadingMessages.length) {
+            robotText.textContent = loadingMessages[messageIndex];
             messageIndex++;
-            setTimeout(showMessages, 2000);
-        } else {
+            setTimeout(showMessages, 1500);
+        }else {
             // Only start fade out after all messages are shown
             loader.style.transition = 'opacity 0.8s';
             loader.style.opacity = '0';
