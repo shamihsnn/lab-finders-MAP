@@ -1014,9 +1014,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const funnyMessages = [
         "INITIALIZING LAB FINDER ...",
         "SCANNING NEARBY LABORATORIES ...", 
-        "WAKING UP SLEEPY DOCTORS ...",
         "LOADING MEDICAL DATABASE ...",
         "ALMOST READY TO HELP YOU ..."
+        
     ];
 
     let messageIndex = 0;

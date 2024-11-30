@@ -12,6 +12,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/video', express.static('video'));
 
 // ApiMedic credentials
 const USERNAME = "x5NRy_GMAIL_COM_AUT";
@@ -120,3 +121,6 @@ app.listen(PORT, () => {
 app.get('/ambulance-loader.svg', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/ambulance-loader.svg'));
 });
+
+
+
