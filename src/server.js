@@ -28,6 +28,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/video', express.static('video'));
+// Add this with your other middleware configurations
+app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
+
+
 
 // ApiMedic credentials
 const USERNAME = "x5NRy_GMAIL_COM_AUT";
