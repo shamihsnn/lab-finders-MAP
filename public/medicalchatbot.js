@@ -1,9 +1,13 @@
+// Generate a unique session ID for this chat instance
+const sessionId = Math.random().toString(36).substring(7);
 let chatHistory = [];
 
 document.getElementById('send-button').addEventListener('click', sendMessage);
 document.getElementById('user-input').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
+
+document.getElementById('file-input').addEventListener('change', handleFileUpload);
 
 async function sendMessage(imageData = null) {
     const userInput = document.getElementById('user-input');
@@ -43,13 +47,14 @@ async function sendMessage(imageData = null) {
             </div>`;
         chatBox.appendChild(loadingDiv);
 
-        // Send to backend
+        // Send to backend with sessionId
         const response = await fetch('/api/medicalchatbot', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 message,
-                imageData: imageData ? imageData : null
+                imageData: imageData ? imageData : null,
+                sessionId
             })
         });
 
@@ -64,6 +69,10 @@ async function sendMessage(imageData = null) {
                         <p>${data.reply}</p>
                     </div>
                 </div>`;
+            
+            // Update local chat history
+            chatHistory.push({ role: 'user', content: message });
+            chatHistory.push({ role: 'assistant', content: data.reply });
         } else {
             throw new Error(data.error || 'Failed to get response');
         }
@@ -99,23 +108,31 @@ async function handleFileUpload(event) {
     }
 }
 
-// Modern drag and drop functionality
-const dropZone = document.getElementById('chat-container');
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
+// Enhanced drag and drop functionality
+const dropZone = document.querySelector('.chat-container');
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
 });
 
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-});
-
-dropZone.addEventListener('drop', (e) => {
+function preventDefaults(e) {
     e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
+    e.stopPropagation();
+}
+
+dropZone.addEventListener('dragenter', () => dropZone.classList.add('drag-over'));
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', handleDrop);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const file = dt.files[0];
+    
     if (file && file.type.startsWith('image/')) {
-        document.getElementById('file-input').files = e.dataTransfer.files;
-        handleFileUpload({ target: { files: [file] } });
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const imageData = e.target.result;
+            await sendMessage(imageData);
+        };
+        reader.readAsDataURL(file);
     }
-});
+}
