@@ -1,10 +1,25 @@
+import * as dotenv from 'dotenv';
+dotenv.config({ path: './.env' });
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from 'path';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
+
+// Log environment details
+console.log('Current working directory:', process.cwd());
+console.log('.env file path:', path.join(process.cwd(), '.env'));
+
+// Configure environment
+
+console.log('API Key loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No');
+
+// Add this after dotenv.config()
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
@@ -124,3 +139,42 @@ app.get('/ambulance-loader.svg', (req, res) => {
 
 
 
+// Add this route for the medical chatbot
+// Update the medical chatbot route
+app.post('/api/medicalchatbot', async (req, res) => {
+    const userMessage = req.body.message;
+
+    try {
+        // Initialize the model
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        
+        // Create a chat session
+        const chat = model.startChat({
+            history: [],
+            generationConfig: {
+                maxOutputTokens: 2048,
+            },
+        });
+
+        // Generate response
+        const result = await chat.sendMessage(userMessage);
+        const response = await result.response;
+        
+        // Send the response back to client
+        res.json({ 
+            reply: response.text(),
+            success: true 
+        });
+    } catch (error) {
+        console.error('Gemini API Error:', error);
+        res.status(500).json({ 
+            error: 'Failed to get response from AI',
+            details: error.message,
+            success: false 
+        });
+    }
+});
+
+app.get('/medicalchatbot', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/medicalchatbot.html'));
+});

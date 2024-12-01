@@ -1016,8 +1016,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const robotText = document.getElementById('robotText');
     const loadingMessages = [
         "Initializing MediMap...",
-        "Preparing Your Experience...",
+        "loading the MAP database...",
         "Almost Ready..."
+        
     ];
     
 
@@ -1109,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Update UI
                 updateRecentSearchesUI();
-            }, 800);
+            }, 1000);
         }
     }
 
