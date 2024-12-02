@@ -147,6 +147,29 @@ app.get('/ambulance-loader.svg', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/ambulance-loader.svg'));
 });
 
+// Add this function before your /api/medicalchatbot route
+function formatAIResponse(text) {
+    // Add markdown-style formatting
+    const formatted = text
+        // Format headings
+        .replace(/^(.*?):\s*$/gm, '## $1\n')
+        // Format lists
+        .replace(/^[-*]\s+(.*?)$/gm, '• $1')
+        // Format important points
+        .replace(/(Important|Note|Warning):/g, '**$1:**')
+        // Format medical terms
+        .replace(/\b([A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*)\b(?=\s*:)/g, '**$1**')
+        // Add line breaks for readability
+        .replace(/\n\n/g, '\n\n<br>\n\n')
+        // Format numbers and percentages
+        .replace(/\b(\d+(?:\.\d+)?%?)\b/g, '<strong>$1</strong>')
+        // Add horizontal rules between sections
+        .replace(/\n---+\n/g, '\n<hr>\n');
+
+    return `<div class="formatted-response">
+        ${formatted}
+    </div>`;
+}
 
 
 // Add this route for the medical chatbot
@@ -188,7 +211,7 @@ if (imageData) {
         history.push({ role: "assistant", content: reply });
         
         conversationHistory.set(sessionId, history);
-        return res.json({ success: true, reply });
+        return res.json({ success: true, reply: formatAIResponse(reply) });
     } catch (imageError) {
         console.error('Vision Model Error:', imageError);
         
@@ -238,11 +261,11 @@ if (history.length > 20) {
 
 conversationHistory.set(sessionId, history);
 
+
 res.json({ 
-    reply,
+    reply: formatAIResponse(reply),
     success: true 
 });
-
 
     } catch (error) {
         console.error('Gemini API Error:', error);

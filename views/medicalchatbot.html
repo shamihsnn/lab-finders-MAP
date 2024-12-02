@@ -145,65 +145,83 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
-        
+        }
         .drag-over {
             border: 2px dashed var(--primary-color);
         }
 
         /* Responsive styles */
-        @media (max-width: 768px) {
-            .chat-container {
-                height: 80vh;
-            }
+       /* Updated Responsive styles */
+@media (max-width: 768px) {
+    .chat-container {
+        margin: 10px;
+        height: calc(100vh - 20px);
+    }
 
-            .chat-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+    .chat-header {
+        padding: 12px;
+        gap: 8px;
+    }
 
-            .chat-header img {
-                max-width: 80px;
-            }
+    .chat-header img {
+        max-width: 60px;
+    }
 
-            #user-input {
-                font-size: 14px;
-            }
+    .chat-header h1 {
+        font-size: 1.2em;
+    }
 
-            .action-button {
-                width: 35px;
-                height: 35px;
-            }
+    .chat-header h1 span {
+        display: block;
+        margin-top: 4px;
+        margin-left: 0;
+    }
+
+    .user-message, .bot-message {
+        max-width: 85%;
+    }
+
+    .input-container {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-container {
+        margin: 0;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .chat-box {
+        padding: 12px;
+    }
+
+    .user-message, .bot-message {
+        max-width: 90%;
+        padding: 10px 12px;
+    }
+
+    .uploaded-image {
+        max-width: 100%;
+    }
+}
+
+        .chat-header h1 span {
+            font-size: 0.8em;
+            color: #c91818;
+            font-weight: normal;
+            margin-left: 10px;
+            display: inline-block;
         }
-
-        @media (max-width: 480px) {
-            .chat-container {
-                height: 70vh;
-            }
-
-            .chat-header {
-                padding: 12px;
-            }
-
-            .chat-header img {
-                max-width: 60px;
-            }
-
-            #user-input {
-                font-size: 12px;
-            }
-
-            .action-button {
-                width: 30px;
-                height: 30px;
-            }
-        }
+        
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
             <img src="/public/images/black_white_on_trans.png" alt="usama Ai">
-            <h1>Medical Assistant</h1>
+            <h1>Medical Assistant <span>developed by usama hsnn</span></h1>
         </div>
         <div id="chat-box" class="chat-box">
             <div class="bot-message">Hello! I'm your medical Assistant created by usama hsnn. i can analyze laboratory reports ,x-rays etc and provide you with the best possible advice. How can I help you today?</div>
