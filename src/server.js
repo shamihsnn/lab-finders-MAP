@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import crypto from 'crypto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import multer from 'multer';
+import compression from 'compression';
 
 // Log environment details
 console.log('Current working directory:', process.cwd());
@@ -27,12 +28,14 @@ const conversationHistory = new Map();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 // Middleware
-app.use(express.json());
+// Middleware configuration - place this right after app initialization
+app.use(express.json({limit: '100mb'}));
+app.use(express.urlencoded({limit: '100mb', extended: true, parameterLimit: 50000}));
 app.use(express.static('public'));
 app.use('/video', express.static('video'));
-// Add this with your other middleware configurations
 app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use(compression());
 
 
 
