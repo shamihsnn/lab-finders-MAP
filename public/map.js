@@ -591,11 +591,22 @@ function createLabFinderUI() {
                     <option value="24/7">24/7</option>
                     <option value="day">Day Time Only</option>
                 </select>
-                <div class="range-filter">
-                    <label>Max Distance (km):</label>
-                    <input type="range" id="distance-filter" min="1" max="20" value="5">
-                    <span id="distance-value">5 km</span>
-                </div>
+             <div class="range-filter">
+    <label>Distance Range:</label>
+    <select id="distance-range-type" class="filter-select">
+        <option value="nearby">Nearby (up to 20km)</option>
+        <option value="extended">Extended (up to 100km)</option>
+    </select>
+    <div class="range-slider">
+        <label>Max Distance: <span id="distance-value">5</span> km</label>
+        <input type="range" id="distance-filter" 
+               min="1" 
+               max="20" 
+               value="5" 
+               class="range-input">
+    </div>
+</div>
+   
             </div>
             <div id="filtered-lab-list" class="lab-list"></div>
         </div>
@@ -615,18 +626,14 @@ function initializeFilters() {
         if (element) {
             element.addEventListener('change', () => {
                 state.currentFilters[key] = element.value;
+                if (key === 'distance') {
+                    document.getElementById('distance-value').textContent = element.value;
+                }
                 updateFilteredLabs();
             });
         }
     });
-
-    // Initialize distance display
-    const distanceValue = document.getElementById('distance-value');
-    if (filters.distance && distanceValue) {
-        filters.distance.addEventListener('input', () => {
-            distanceValue.textContent = `${filters.distance.value} km`;
-        });
-    }
+    initializeDistanceRangeFilter();
 }
 
 function updateFilteredLabs() {
@@ -704,15 +711,48 @@ function createLabFinderUI() {
                     <option value="day">Day Time Only</option>
                 </select>
                 <div class="range-filter">
-                    <label>Max Distance (km):</label>
-                    <input type="range" id="distance-filter" min="1" max="20" value="5">
-                    <span id="distance-value">5 km</span>
+                    <label>Distance Range:</label>
+                    <select id="distance-range-type" class="filter-select">
+                        <option value="nearby">Nearby (up to 20km)</option>
+                        <option value="extended">Extended (up to 100km)</option>
+                    </select>
+                    <div class="range-slider">
+                        <label>Max Distance: <span id="distance-value">5</span> km</label>
+                        <input type="range" id="distance-filter" 
+                               min="1" 
+                               max="20" 
+                               value="5" 
+                               class="range-input">
+                    </div>
                 </div>
             </div>
             <div id="filtered-lab-list" class="lab-list"></div>
         </div>
     `;
     return container;
+}
+
+function initializeDistanceRangeFilter() {
+    const rangeTypeSelect = document.getElementById('distance-range-type');
+    const distanceSlider = document.getElementById('distance-filter');
+    const distanceValue = document.getElementById('distance-value');
+
+    if (rangeTypeSelect && distanceSlider) {
+        rangeTypeSelect.addEventListener('change', function() {
+            const isExtended = this.value === 'extended';
+            distanceSlider.max = isExtended ? '100' : '20';
+            
+            // Adjust current value if needed
+            if (isExtended && distanceSlider.value > 20) {
+                distanceSlider.value = 20;
+            }
+            distanceValue.textContent = distanceSlider.value;
+            
+            // Trigger filter update
+            state.currentFilters.distance = parseFloat(distanceSlider.value);
+            updateFilteredLabs();
+        });
+    }
 }
 
 // Update your state to include rating filter

@@ -18,7 +18,7 @@ console.log('.env file path:', path.join(process.cwd(), '.env'));
 
 console.log('API Key loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No');
 
-// Add this after dotenv.config()
+
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +28,7 @@ const conversationHistory = new Map();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 // Middleware
-// Middleware configuration - place this right after app initialization
+
 app.use(express.json({limit: '100mb'}));
 app.use(express.urlencoded({limit: '100mb', extended: true, parameterLimit: 50000}));
 app.use(express.static('public'));
@@ -142,12 +142,12 @@ app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// Add this route to your existing Express server
+
 app.get('/ambulance-loader.svg', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/ambulance-loader.svg'));
 });
 
-// Add this function before your /api/medicalchatbot route
+
 function formatAIResponse(text) {
     // Add markdown-style formatting
     const formatted = text
@@ -163,7 +163,7 @@ function formatAIResponse(text) {
         .replace(/\n\n/g, '\n\n<br>\n\n')
         // Format numbers and percentages
         .replace(/\b(\d+(?:\.\d+)?%?)\b/g, '<strong>$1</strong>')
-        // Add horizontal rules between sections
+    
         .replace(/\n---+\n/g, '\n<hr>\n');
 
     return `<div class="formatted-response">
@@ -172,18 +172,16 @@ function formatAIResponse(text) {
 }
 
 
-// Add this route for the medical chatbot
-// Update the medical chatbot route
+
+
 app.post('/api/medicalchatbot', async (req, res) => {
     const { message, imageData, sessionId } = req.body;
     
     try {
-        // Get or initialize conversation history
+  
         let history = conversationHistory.get(sessionId) || [];
         
-        // Handle image analysis
-        // Inside your /api/medicalchatbot route
-// Inside your /api/medicalchatbot route, update the image analysis section
+     
 if (imageData) {
     const visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
@@ -192,7 +190,17 @@ if (imageData) {
     const prompt = {
         contents: [{
             parts: [{
-                text: `You are a medical professional. Please analyze this medical image and provide detailed insights about any visible conditions, abnormalities, or notable features. Context: ${message}`
+                text: `You are a highly experienced medical professional with expertise in diagnostic imaging and radiology. Please analyze the provided medical image comprehensively and provide:
+1. A detailed description of any visible anatomical structures
+2. Identification and analysis of any abnormalities, lesions, or unusual patterns
+3. Assessment of tissue density, contrast, and structural relationships
+4. Comparison with normal anatomical references where applicable
+5. Potential differential diagnoses based on visible features
+6. Recommendations for additional imaging or tests if necessary
+7. Technical evaluation of image quality, positioning, and any artifacts
+8. Clear indication of the anatomical orientation and viewing perspective
+
+Please present your findings in a structured format using standard medical terminology while also providing explanations in clear, understandable language. Note any limitations in the assessment due to image quality or positioning. Context: ${message}`
             }, {
                 inlineData: {
                     mimeType: "image/jpeg",
@@ -229,11 +237,11 @@ if (imageData) {
         return res.json({ success: true, reply: fallbackReply });
     }
 }
-// Regular text conversation with memory
+
 // Regular text conversation with memory
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-// Format history correctly for Gemini API - map 'assistant' role to 'model'
+
 const formattedHistory = history.map(msg => ({
     role: msg.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: msg.content }]
